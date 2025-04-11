@@ -635,7 +635,14 @@ void scenes::lobby::gui_settings()
 		const auto width = stream_view.recommendedImageRectWidth;
 		const auto height = stream_view.recommendedImageRectHeight;
 		auto intScale = int(current * 100);
-		if (ImGui::SliderInt(_S("Resolution scale"), &intScale, 50, 350, fmt::format(_F("%d%% - {}x{} per eye"), int(width * current), int(height * current)).c_str()))
+		const auto slider = ImGui::SliderInt(
+		        _("Resolution scale").append("##resolution_scale").c_str(),
+		        &intScale,
+		        50,
+		        350,
+		        fmt::format(_F("%d%% - {}x{} per eye"), int(width * current), int(height * current)).c_str()
+		);
+		if (slider)
 		{
 			config.resolution_scale = intScale * 0.01;
 			config.save();
@@ -647,6 +654,84 @@ void scenes::lobby::gui_settings()
 			ImGui::SameLine();
 			ImGui::Text("%s", fmt::format(_F("Resolution larger than {}x{} may not be supported by the headset"), stream_view.maxImageRectWidth, stream_view.maxImageRectHeight).c_str());
 		}
+	}
+
+	{
+		bool enabled = config.use_sgsr;
+		if (ImGui::Checkbox(_S("Enable Snapdragon Game Super Resolution"), &enabled))
+		{
+			config.use_sgsr = enabled;
+			config.save();
+		}
+		vibrate_on_hover();
+		if (ImGui::IsItemHovered())
+			tooltip(_("Client-side upscaling and sharpening, at a small performance cost"));
+	}
+
+	{
+		ImGui::BeginDisabled(not config.use_sgsr);
+		ImGui::Indent();
+		{
+			const auto current = config.upscaling_factor;
+			const auto width = stream_view.recommendedImageRectWidth * config.resolution_scale;
+			const auto height = stream_view.recommendedImageRectHeight  * config.resolution_scale;
+			auto intScale = int(current * 100);
+			const auto slider = ImGui::SliderInt(
+			        _("Upscaling factor").append("##upscaling_factor").c_str(),
+			        &intScale,
+			        100,
+			        200,
+			        fmt::format(_F("%d%% - {}x{} per eye"), int(width * current), int(height * current)).c_str()
+			);
+			if (slider)
+			{
+				config.upscaling_factor = intScale * 0.01;
+				config.save();
+			}
+			vibrate_on_hover();
+			if (width * config.upscaling_factor > stream_view.maxImageRectWidth or height * config.upscaling_factor > stream_view.maxImageRectHeight)
+			{
+				ImGui::TextColored(ImColor(0xf9, 0x73, 0x06) /*orange*/, ICON_FA_TRIANGLE_EXCLAMATION);
+				ImGui::SameLine();
+				ImGui::Text("%s", fmt::format(_F("Resolution larger than {}x{} may not be supported by the headset"), stream_view.maxImageRectWidth, stream_view.maxImageRectHeight).c_str());
+			}
+		}
+		{
+			bool enabled = config.use_edge_direction;
+			if (ImGui::Checkbox(_S("Use edge direction"), &enabled))
+			{
+				config.use_edge_direction = enabled;
+				config.save();
+			}
+			vibrate_on_hover();
+			if (ImGui::IsItemHovered())
+				tooltip(_("Adds a small additional performance cost"));
+		}
+		{
+			const float current = config.edge_threshold;
+			int intScale = int(current);
+			if (ImGui::SliderInt(_S("Edge threshold"), &intScale, 1, 16, "%d.0"))
+			{
+				config.edge_threshold = float(intScale);
+				config.save();
+			}
+			vibrate_on_hover();
+			if (ImGui::IsItemHovered())
+				tooltip(fmt::format(_F("Recommended: {:.1f}"), 4.0).c_str());
+		}
+		{
+			float current = config.edge_sharpness;
+			if (ImGui::SliderFloat(_S("Edge sharpness"), &current, 1.0, 2.0, "%.2f"))
+			{
+				config.edge_sharpness = current;
+				config.save();
+			}
+			vibrate_on_hover();
+			if (ImGui::IsItemHovered())
+				tooltip(_(fmt::format(_F("Recommended: {:.1f}"), 2.0).c_str()));
+		}
+		ImGui::Unindent();
+		ImGui::EndDisabled();
 	}
 
 	{

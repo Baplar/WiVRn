@@ -188,6 +188,21 @@ configuration::configuration(xr::system & system)
 		if (auto val = root["resolution_scale"]; val.is_double())
 			resolution_scale = val.get_double();
 
+		if (auto val = root["use_sgsr"]; val.is_bool())
+			use_sgsr = val.get_bool();
+
+		if (auto val = root["upscaling_factor"]; val.is_double())
+			upscaling_factor = val.get_double();
+
+		if (auto val = root["use_edge_direction"]; val.is_bool())
+			use_edge_direction = val.get_bool();
+
+		if (auto val = root["edge_threshold"]; val.is_double())
+			edge_threshold = val.get_double();
+
+		if (auto val = root["edge_sharpness"]; val.is_double())
+			edge_sharpness = val.get_double();
+
 		if (auto val = root["passthrough_enabled"]; val.is_bool())
 			passthrough_enabled = val.get_bool();
 
@@ -215,6 +230,11 @@ configuration::configuration(xr::system & system)
 		preferred_refresh_rate.reset();
 		minimum_refresh_rate.reset();
 		resolution_scale = 1.4;
+		use_sgsr = false;
+		upscaling_factor = 1.5;
+		use_edge_direction = true;
+		edge_threshold = 4.0;
+		edge_sharpness = 2.0;
 		show_performance_metrics = false;
 		passthrough_enabled = system.passthrough_supported() == xr::system::passthrough_type::color;
 	}
@@ -260,6 +280,11 @@ void configuration::save()
 	if (minimum_refresh_rate)
 		json << ",\"minimum_refresh_rate\":" << *minimum_refresh_rate;
 	json << ",\"resolution_scale\":" << resolution_scale;
+	json << ",\"use_sgsr\":" << use_sgsr;
+	json << ",\"upscaling_factor\":" << upscaling_factor;
+	json << ",\"use_edge_direction\":" << use_edge_direction;
+	json << ",\"edge_threshold\":" << edge_threshold;
+	json << ",\"edge_sharpness\":" << edge_sharpness;
 	json << ",\"passthrough_enabled\":" << std::boolalpha << passthrough_enabled;
 	json << ",\"mic_unprocessed_audio\":" << std::boolalpha << mic_unprocessed_audio;
 	for (auto & [key, value]: features)

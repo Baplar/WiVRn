@@ -45,6 +45,14 @@ struct uniform
 
 const int nb_reprojection_vertices = 128;
 
+struct FragmentSpecializationConstants
+{
+	bool use_sgsr;
+	bool use_edge_direction;
+	float edge_threshold;
+	float edge_sharpness;
+};
+
 stream_reprojection::stream_reprojection(
         vk::raii::Device & device,
         vk::raii::PhysicalDevice & physical_device,
@@ -238,23 +246,17 @@ stream_reprojection::stream_reprojection(
 
 	renderpass = vk::raii::RenderPass(device, renderpass_info.get());
 
-	// Create graphics pipeline
+	// Vertex shader
 	vk::raii::ShaderModule vertex_shader = load_shader(device, "reprojection.vert");
-	vk::raii::ShaderModule fragment_shader = load_shader(device, "reprojection.frag");
 
-	vk::PipelineLayoutCreateInfo pipeline_layout_info;
-	pipeline_layout_info.setSetLayouts(*descriptor_set_layout);
-
-	layout = vk::raii::PipelineLayout(device, pipeline_layout_info);
-
-	int specialization_constants[] = {
+	int vertex_specialization_constants[] = {
 	        foveation_parameters[0].x.scale < 1,
 	        foveation_parameters[0].y.scale < 1,
 	        nb_reprojection_vertices,
 	        nb_reprojection_vertices,
 	};
 
-	std::array specialization_constants_desc{
+	std::array vertex_specialization_constants_desc{
 	        vk::SpecializationMapEntry{
 	                .constantID = 0,
 	                .offset = 0,
@@ -277,11 +279,55 @@ stream_reprojection::stream_reprojection(
 	        },
 	};
 
-	vk::SpecializationInfo specialization_info;
+	vk::SpecializationInfo vertex_specialization_info;
+	vertex_specialization_info.setMapEntries(vertex_specialization_constants_desc);
+	vertex_specialization_info.setData<int>(vertex_specialization_constants);
 
-	specialization_info.setMapEntries(specialization_constants_desc);
-	specialization_info.setData<int>(specialization_constants);
+	// Fragment shader
+	vk::raii::ShaderModule fragment_shader = load_shader(device, "reprojection.frag");
 
+
+	FragmentSpecializationConstants fragment_specialization_constants = {
+		.use_sgsr = application::get_config().use_sgsr,
+		.use_edge_direction = application::get_config().use_edge_direction,
+		.edge_threshold = float(application::get_config().edge_threshold / 255.0),
+		.edge_sharpness = application::get_config().edge_sharpness,
+	} ;
+
+	std::array fragment_specialization_constants_desc{
+			vk::SpecializationMapEntry{
+					.constantID = 0,
+					.offset = offsetof(FragmentSpecializationConstants, use_sgsr),
+					.size = sizeof(fragment_specialization_constants.use_sgsr),
+			},
+			vk::SpecializationMapEntry{
+					.constantID = 1,
+					.offset = offsetof(FragmentSpecializationConstants, use_edge_direction),
+					.size = sizeof(fragment_specialization_constants.use_edge_direction),
+			},
+			vk::SpecializationMapEntry{
+					.constantID = 2,
+					.offset = offsetof(FragmentSpecializationConstants, edge_threshold),
+					.size = sizeof(fragment_specialization_constants.edge_threshold),
+			},
+			vk::SpecializationMapEntry{
+					.constantID = 3,
+					.offset = offsetof(FragmentSpecializationConstants, edge_sharpness),
+					.size = sizeof(fragment_specialization_constants.edge_sharpness),
+			},
+	};
+
+	vk::SpecializationInfo fragment_specialization_info;
+	fragment_specialization_info.setMapEntries(fragment_specialization_constants_desc);
+	fragment_specialization_info.setDataSize(sizeof(fragment_specialization_constants));
+	fragment_specialization_info.setPData(&fragment_specialization_constants);
+
+	// Create graphics pipeline
+	vk::PipelineLayoutCreateInfo pipeline_layout_info;
+	pipeline_layout_info.setSetLayouts(*descriptor_set_layout);
+	
+	layout = vk::raii::PipelineLayout(device, pipeline_layout_info);
+	
 	vk::pipeline_builder pipeline_info{
 	        .flags = {},
 	        .Stages = {
@@ -289,13 +335,13 @@ stream_reprojection::stream_reprojection(
 	                        .stage = vk::ShaderStageFlagBits::eVertex,
 	                        .module = *vertex_shader,
 	                        .pName = "main",
-	                        .pSpecializationInfo = &specialization_info,
+	                        .pSpecializationInfo = &vertex_specialization_info,
 	                },
 	                {
 	                        .stage = vk::ShaderStageFlagBits::eFragment,
 	                        .module = *fragment_shader,
 	                        .pName = "main",
-	                        .pSpecializationInfo = &specialization_info,
+	                        .pSpecializationInfo = &fragment_specialization_info,
 	                },
 	        },
 	        .VertexBindingDescriptions = {},

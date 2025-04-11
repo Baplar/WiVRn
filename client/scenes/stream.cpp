@@ -1148,8 +1148,15 @@ void scenes::stream::setup_reprojection_swapchain()
 
 	const uint32_t video_width = video_stream_description->width / view_count;
 	const uint32_t video_height = video_stream_description->height;
-	const uint32_t swapchain_width = video_width / video_stream_description->foveation[0].x.scale;
-	const uint32_t swapchain_height = video_height / video_stream_description->foveation[0].y.scale;
+	uint32_t swapchain_width = video_width / video_stream_description->foveation[0].x.scale;
+	uint32_t swapchain_height = video_height / video_stream_description->foveation[0].y.scale;
+	if (application::get_config().use_sgsr)
+	{
+		const float upscaling_factor = application::get_config().upscaling_factor;
+		spdlog::info("Using SGSR with an upscale factor of {}", upscaling_factor);
+		swapchain_height = (uint32_t) (swapchain_height * upscaling_factor);
+		swapchain_width = (uint32_t) (swapchain_width * upscaling_factor);
+	}
 
 	auto views = system.view_configuration_views(viewconfig);
 

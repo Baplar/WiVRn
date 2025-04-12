@@ -47,7 +47,7 @@ const int nb_reprojection_vertices = 128;
 
 struct SgsrSpecializationConstants
 {
-	bool use_edge_direction;
+	VkBool32 use_edge_direction;
 	float edge_threshold;
 	float edge_sharpness;
 };
@@ -284,18 +284,21 @@ stream_reprojection::stream_reprojection(
 
 	// Fragment shader
 	std::string fragment_shader_name = "reprojection.frag";
+
 	vk::SpecializationInfo fragment_specialization_info;
+	SgsrSpecializationConstants fragment_specialization_constants;
+	std::vector<vk::SpecializationMapEntry> fragment_specialization_constants_desc;
 	if (application::get_config().use_sgsr)
 	{
 		fragment_shader_name = "reprojection_sgsr.frag";
 
-		SgsrSpecializationConstants fragment_specialization_constants = {
+		fragment_specialization_constants = {
 		        .use_edge_direction = application::get_config().use_edge_direction,
 		        .edge_threshold = float(application::get_config().edge_threshold / 255.0),
 		        .edge_sharpness = application::get_config().edge_sharpness,
 		};
 
-		std::array fragment_specialization_constants_desc{
+		fragment_specialization_constants_desc = {
 		        vk::SpecializationMapEntry{
 		                .constantID = 0,
 		                .offset = offsetof(SgsrSpecializationConstants, use_edge_direction),

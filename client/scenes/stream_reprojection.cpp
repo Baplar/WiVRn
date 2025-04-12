@@ -288,7 +288,7 @@ stream_reprojection::stream_reprojection(
 	vk::SpecializationInfo fragment_specialization_info;
 	SgsrSpecializationConstants fragment_specialization_constants;
 	std::vector<vk::SpecializationMapEntry> fragment_specialization_constants_desc;
-	if (application::get_config().use_sgsr)
+	if (application::get_config().check_feature(feature::sgsr))
 	{
 		fragment_shader_name = "reprojection_sgsr.frag";
 

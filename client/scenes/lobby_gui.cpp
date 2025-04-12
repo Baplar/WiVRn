@@ -655,20 +655,29 @@ void scenes::lobby::gui_settings()
 		}
 	}
 
+	bool sgsr_supported = supports_sgsr(guess_model());
+
 	{
-		bool enabled = config.use_sgsr;
+		ImGui::BeginDisabled(not sgsr_supported);
+		bool enabled = config.check_feature(feature::sgsr);
 		if (ImGui::Checkbox(_S("Enable Snapdragon Game Super Resolution"), &enabled))
 		{
-			config.use_sgsr = enabled;
+			config.set_feature(feature::sgsr, enabled);
 			config.save();
 		}
 		vibrate_on_hover();
-		if (ImGui::IsItemHovered())
-			tooltip(_("Client-side upscaling and sharpening, at a small performance cost"));
+		if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+		{
+			if (sgsr_supported)
+				tooltip(_("Client-side upscaling and sharpening, at a small performance cost"));
+			else
+				tooltip(_("Snapdragon Game Super Resolution is not supported on this headset"));
+		}
+		ImGui::EndDisabled();
 	}
 
 	{
-		ImGui::BeginDisabled(not config.use_sgsr);
+		ImGui::BeginDisabled(not config.check_feature(feature::sgsr));
 		ImGui::Indent();
 		{
 			const auto current = config.upscaling_factor;
@@ -950,7 +959,7 @@ void scenes::lobby::gui_licenses()
 	ImGui::Text("%s", _("Licenses").c_str());
 	ImGui::PopFont();
 
-	const auto components = {"WiVRn", "FontAwesome", "openxr-loader", "simdjson"};
+	const auto components = {"WiVRn", "FontAwesome", "openxr-loader", "simdjson", "SGSR"};
 	if (not license)
 	{
 		selected_item = *components.begin();

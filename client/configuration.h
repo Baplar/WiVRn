@@ -53,7 +53,6 @@ public:
 	bool passthrough_enabled = false;
 	bool mic_unprocessed_audio = false;
 
-	bool use_sgsr = false;
 	float upscaling_factor = 1.5;
 	bool use_edge_direction = true;
 	float edge_threshold = 4.0;

@@ -48,6 +48,7 @@ enum class feature
 	hand_tracking,
 	eye_gaze,
 	face_tracking,
+	sgsr,
 };
 
 model guess_model();
@@ -56,6 +57,7 @@ std::string model_name();
 XrViewConfigurationView override_view(XrViewConfigurationView, model = guess_model());
 
 bool need_srgb_conversion(model);
+bool supports_sgsr(model);
 
 // Return nullptr if no permission is required
 const char * permission_name(feature f);

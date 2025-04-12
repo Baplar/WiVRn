@@ -924,6 +924,16 @@ void scenes::stream::render(const XrFrameState & frame_state)
 	        .views = layer_view.data(),
 	};
 
+	XrCompositionLayerSettingsFB settings;
+	if (instance.has_extension(XR_FB_COMPOSITION_LAYER_SETTINGS_EXTENSION_NAME))
+	{
+		settings = {
+		        .type = XR_TYPE_COMPOSITION_LAYER_SETTINGS_FB,
+		        .layerFlags = XR_COMPOSITION_LAYER_SETTINGS_QUALITY_SUPER_SAMPLING_BIT_FB | XR_COMPOSITION_LAYER_SETTINGS_QUALITY_SHARPENING_BIT_FB,
+		};
+		layer.next = &settings;
+	}
+
 	std::vector<XrCompositionLayerQuad> imgui_layers;
 	if (imgui_ctx)
 	{
@@ -1150,7 +1160,8 @@ void scenes::stream::setup_reprojection_swapchain()
 	const uint32_t video_height = video_stream_description->height;
 	uint32_t swapchain_width = video_width / video_stream_description->foveation[0].x.scale;
 	uint32_t swapchain_height = video_height / video_stream_description->foveation[0].y.scale;
-	if (application::get_config().check_feature(feature::sgsr))
+
+	if (application::get_config().use_upscaling and not instance.has_extension(XR_FB_COMPOSITION_LAYER_SETTINGS_EXTENSION_NAME))
 	{
 		const float upscaling_factor = application::get_config().upscaling_factor;
 		spdlog::info("Using SGSR with an upscale factor of {}", upscaling_factor);

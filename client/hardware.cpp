@@ -192,6 +192,9 @@ bool supports_sgsr(model m)
 		case model::meta_quest_pro:
 		case model::meta_quest_3:
 		case model::meta_quest_3s:
+			// All Quest headsets implement the MQSR extension and will use it instead of SGSR,
+			// but they technically support it thanks to having an XR2
+			[[fallthrough]];
 		case model::pico_neo_3:
 		case model::pico_4:
 		case model::pico_4s:
@@ -212,7 +215,6 @@ const char * permission_name(feature f)
 		case feature::microphone:
 			return "android.permission.RECORD_AUDIO";
 		case feature::hand_tracking:
-		case feature::sgsr:
 			return nullptr;
 		case feature::eye_gaze:
 			switch (guess_model())

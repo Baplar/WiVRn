@@ -118,11 +118,6 @@ bool configuration::check_feature(feature f) const
 							return false;
 						break;
 				}
-				break;
-			case feature::sgsr:
-				if (not supports_sgsr(guess_model()))
-					return false;
-				break;
 		}
 	}
 #ifdef __ANDROID__
@@ -193,6 +188,9 @@ configuration::configuration(xr::system & system)
 		if (auto val = root["resolution_scale"]; val.is_double())
 			resolution_scale = val.get_double();
 
+		if (auto val = root["use_upscaling"]; val.is_bool())
+			use_upscaling = val.get_bool();
+
 		if (auto val = root["upscaling_factor"]; val.is_double())
 			upscaling_factor = val.get_double();
 
@@ -232,6 +230,7 @@ configuration::configuration(xr::system & system)
 		preferred_refresh_rate.reset();
 		minimum_refresh_rate.reset();
 		resolution_scale = 1.4;
+		use_upscaling = false;
 		upscaling_factor = 1.5;
 		use_edge_direction = true;
 		edge_threshold = 4.0;
@@ -281,6 +280,7 @@ void configuration::save()
 	if (minimum_refresh_rate)
 		json << ",\"minimum_refresh_rate\":" << *minimum_refresh_rate;
 	json << ",\"resolution_scale\":" << resolution_scale;
+	json << ",\"use_upscaling\":" << std::boolalpha << use_upscaling;
 	json << ",\"upscaling_factor\":" << upscaling_factor;
 	json << ",\"use_edge_direction\":" << std::boolalpha << use_edge_direction;
 	json << ",\"edge_threshold\":" << edge_threshold;

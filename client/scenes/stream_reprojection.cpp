@@ -45,9 +45,8 @@ struct uniform
 
 const int nb_reprojection_vertices = 128;
 
-struct FragmentSpecializationConstants
+struct SgsrSpecializationConstants
 {
-	bool use_sgsr;
 	bool use_edge_direction;
 	float edge_threshold;
 	float edge_sharpness;
@@ -284,50 +283,49 @@ stream_reprojection::stream_reprojection(
 	vertex_specialization_info.setData<int>(vertex_specialization_constants);
 
 	// Fragment shader
-	vk::raii::ShaderModule fragment_shader = load_shader(device, "reprojection.frag");
-
-
-	FragmentSpecializationConstants fragment_specialization_constants = {
-		.use_sgsr = application::get_config().use_sgsr,
-		.use_edge_direction = application::get_config().use_edge_direction,
-		.edge_threshold = float(application::get_config().edge_threshold / 255.0),
-		.edge_sharpness = application::get_config().edge_sharpness,
-	} ;
-
-	std::array fragment_specialization_constants_desc{
-			vk::SpecializationMapEntry{
-					.constantID = 0,
-					.offset = offsetof(FragmentSpecializationConstants, use_sgsr),
-					.size = sizeof(fragment_specialization_constants.use_sgsr),
-			},
-			vk::SpecializationMapEntry{
-					.constantID = 1,
-					.offset = offsetof(FragmentSpecializationConstants, use_edge_direction),
-					.size = sizeof(fragment_specialization_constants.use_edge_direction),
-			},
-			vk::SpecializationMapEntry{
-					.constantID = 2,
-					.offset = offsetof(FragmentSpecializationConstants, edge_threshold),
-					.size = sizeof(fragment_specialization_constants.edge_threshold),
-			},
-			vk::SpecializationMapEntry{
-					.constantID = 3,
-					.offset = offsetof(FragmentSpecializationConstants, edge_sharpness),
-					.size = sizeof(fragment_specialization_constants.edge_sharpness),
-			},
-	};
-
+	std::string fragment_shader_name = "reprojection.frag";
 	vk::SpecializationInfo fragment_specialization_info;
-	fragment_specialization_info.setMapEntries(fragment_specialization_constants_desc);
-	fragment_specialization_info.setDataSize(sizeof(fragment_specialization_constants));
-	fragment_specialization_info.setPData(&fragment_specialization_constants);
+	if (application::get_config().use_sgsr)
+	{
+		fragment_shader_name = "reprojection_sgsr.frag";
+
+		SgsrSpecializationConstants fragment_specialization_constants = {
+		        .use_edge_direction = application::get_config().use_edge_direction,
+		        .edge_threshold = float(application::get_config().edge_threshold / 255.0),
+		        .edge_sharpness = application::get_config().edge_sharpness,
+		};
+
+		std::array fragment_specialization_constants_desc{
+		        vk::SpecializationMapEntry{
+		                .constantID = 0,
+		                .offset = offsetof(SgsrSpecializationConstants, use_edge_direction),
+		                .size = sizeof(fragment_specialization_constants.use_edge_direction),
+		        },
+		        vk::SpecializationMapEntry{
+		                .constantID = 1,
+		                .offset = offsetof(SgsrSpecializationConstants, edge_threshold),
+		                .size = sizeof(fragment_specialization_constants.edge_threshold),
+		        },
+		        vk::SpecializationMapEntry{
+		                .constantID = 2,
+		                .offset = offsetof(SgsrSpecializationConstants, edge_sharpness),
+		                .size = sizeof(fragment_specialization_constants.edge_sharpness),
+		        },
+		};
+
+		fragment_specialization_info.setMapEntries(fragment_specialization_constants_desc);
+		fragment_specialization_info.setDataSize(sizeof(fragment_specialization_constants));
+		fragment_specialization_info.setPData(&fragment_specialization_constants);
+	}
+
+	vk::raii::ShaderModule fragment_shader = load_shader(device, fragment_shader_name);
 
 	// Create graphics pipeline
 	vk::PipelineLayoutCreateInfo pipeline_layout_info;
 	pipeline_layout_info.setSetLayouts(*descriptor_set_layout);
-	
+
 	layout = vk::raii::PipelineLayout(device, pipeline_layout_info);
-	
+
 	vk::pipeline_builder pipeline_info{
 	        .flags = {},
 	        .Stages = {

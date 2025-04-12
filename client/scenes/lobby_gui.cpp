@@ -640,8 +640,7 @@ void scenes::lobby::gui_settings()
 		        &intScale,
 		        50,
 		        350,
-		        fmt::format(_F("%d%% - {}x{} per eye"), int(width * current), int(height * current)).c_str()
-		);
+		        fmt::format(_F("%d%% - {}x{} per eye"), int(width * current), int(height * current)).c_str());
 		if (slider)
 		{
 			config.resolution_scale = intScale * 0.01;
@@ -674,15 +673,14 @@ void scenes::lobby::gui_settings()
 		{
 			const auto current = config.upscaling_factor;
 			const auto width = stream_view.recommendedImageRectWidth * config.resolution_scale;
-			const auto height = stream_view.recommendedImageRectHeight  * config.resolution_scale;
+			const auto height = stream_view.recommendedImageRectHeight * config.resolution_scale;
 			auto intScale = int(current * 100);
 			const auto slider = ImGui::SliderInt(
 			        _("Upscaling factor").append("##upscaling_factor").c_str(),
 			        &intScale,
 			        100,
 			        200,
-			        fmt::format(_F("%d%% - {}x{} per eye"), int(width * current), int(height * current)).c_str()
-			);
+			        fmt::format(_F("%d%% - {}x{} per eye"), int(width * current), int(height * current)).c_str());
 			if (slider)
 			{
 				config.upscaling_factor = intScale * 0.01;

@@ -54,6 +54,7 @@ public:
 	bool passthrough_enabled = false;
 	bool mic_unprocessed_audio = false;
 
+	// Snapdragon Game Super Resolution
 	struct sgsr_settings
 	{
 		bool enabled = false;
@@ -64,12 +65,13 @@ public:
 	};
 	sgsr_settings sgsr{};
 
-	struct mqsr_settings
+	// XR_FB_composition_layer_settings extension flags
+	struct openxr_post_processing_settings
 	{
 		XrCompositionLayerSettingsFlagsFB super_sampling = 0;
 		XrCompositionLayerSettingsFlagsFB sharpening = 0;
 	};
-	mqsr_settings mqsr{};
+	openxr_post_processing_settings openxr_post_processing{};
 
 	std::string virtual_keyboard_layout = "QWERTY";
 
@@ -81,7 +83,7 @@ private:
 	std::map<feature, bool> features;
 
 	void parse_sgsr_options(simdjson::simdjson_result<simdjson::dom::object> root);
-	void parse_mqsr_options(simdjson::simdjson_result<simdjson::dom::object> root);
+	void parse_openxr_post_processing_options(simdjson::simdjson_result<simdjson::dom::object> root);
 
 public:
 	configuration(xr::system &);

@@ -122,18 +122,18 @@ static void display_recentering_tip(imgui_context & ctx, const std::string & tip
 	ImGui::PopFont();
 }
 
-std::string mqsr_flag_name(XrCompositionLayerSettingsFlagsFB flag)
+std::string openxr_post_processing_flag_name(XrCompositionLayerSettingsFlagsFB flag)
 {
 	switch (flag)
 	{
 		case XR_COMPOSITION_LAYER_SETTINGS_NORMAL_SUPER_SAMPLING_BIT_FB:
 		case XR_COMPOSITION_LAYER_SETTINGS_NORMAL_SHARPENING_BIT_FB:
-			return _("Normal##mqsr_normal");
+			return _("Normal##openxr_post_processing_normal");
 		case XR_COMPOSITION_LAYER_SETTINGS_QUALITY_SUPER_SAMPLING_BIT_FB:
 		case XR_COMPOSITION_LAYER_SETTINGS_QUALITY_SHARPENING_BIT_FB:
-			return _("Quality##mqsr_quality");
+			return _("Quality##openxr_post_processing_quality");
 		default:
-			return _("Disabled##mqsr_disabled");
+			return _("Disabled##openxr_post_processing_disabled");
 	}
 }
 
@@ -812,12 +812,11 @@ void scenes::lobby::gui_post_processing()
 
 	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(20, 20));
 
-	if (application::get_mqsr_supported())
+	if (application::get_openxr_post_processing_supported())
 	{
-		// MQSR
 		{
-			XrCompositionLayerSettingsFlagsFB current = config.mqsr.super_sampling;
-			if (ImGui::BeginCombo(_S("Supersampling"), mqsr_flag_name(current).c_str()))
+			XrCompositionLayerSettingsFlagsFB current = config.openxr_post_processing.super_sampling;
+			if (ImGui::BeginCombo(_S("Supersampling"), openxr_post_processing_flag_name(current).c_str()))
 			{
 				const XrCompositionLayerSettingsFlagsFB selectable_options[]{
 				        0,
@@ -825,9 +824,9 @@ void scenes::lobby::gui_post_processing()
 				        XR_COMPOSITION_LAYER_SETTINGS_QUALITY_SUPER_SAMPLING_BIT_FB};
 				for (XrCompositionLayerSettingsFlagsFB option: selectable_options)
 				{
-					if (ImGui::Selectable(mqsr_flag_name(option).c_str(), current == option, ImGuiSelectableFlags_SelectOnRelease))
+					if (ImGui::Selectable(openxr_post_processing_flag_name(option).c_str(), current == option, ImGuiSelectableFlags_SelectOnRelease))
 					{
-						config.mqsr.super_sampling = option;
+						config.openxr_post_processing.super_sampling = option;
 						config.save();
 					}
 					vibrate_on_hover();
@@ -841,8 +840,8 @@ void scenes::lobby::gui_post_processing()
 			}
 		}
 		{
-			XrCompositionLayerSettingsFlagsFB current = config.mqsr.sharpening;
-			if (ImGui::BeginCombo(_S("Sharpening"), mqsr_flag_name(current).c_str()))
+			XrCompositionLayerSettingsFlagsFB current = config.openxr_post_processing.sharpening;
+			if (ImGui::BeginCombo(_S("Sharpening"), openxr_post_processing_flag_name(current).c_str()))
 			{
 				const XrCompositionLayerSettingsFlagsFB selectable_options[]{
 				        0,
@@ -850,9 +849,9 @@ void scenes::lobby::gui_post_processing()
 				        XR_COMPOSITION_LAYER_SETTINGS_QUALITY_SHARPENING_BIT_FB};
 				for (XrCompositionLayerSettingsFlagsFB option: selectable_options)
 				{
-					if (ImGui::Selectable(mqsr_flag_name(option).c_str(), current == option, ImGuiSelectableFlags_SelectOnRelease))
+					if (ImGui::Selectable(openxr_post_processing_flag_name(option).c_str(), current == option, ImGuiSelectableFlags_SelectOnRelease))
 					{
-						config.mqsr.sharpening = option;
+						config.openxr_post_processing.sharpening = option;
 						config.save();
 					}
 					vibrate_on_hover();
@@ -879,12 +878,12 @@ void scenes::lobby::gui_post_processing()
 			vibrate_on_hover();
 			if (ImGui::IsItemHovered())
 			{
-				if (application::get_mqsr_supported())
+				if (application::get_openxr_post_processing_supported())
 					tooltip(_("On this headset, this setting has been fully superseded by the native Sharpening setting above.\nOnly enable if you know what you’re doing."));
 				else
 					tooltip(_("Client-side upscaling and sharpening, adds a performance cost on the headset"));
 			}
-			if (application::get_mqsr_supported())
+			if (application::get_openxr_post_processing_supported())
 			{
 				ImGui::SameLine();
 				ImGui::TextColored(ImColor(0xf9, 0x73, 0x06) /*orange*/, ICON_FA_TRIANGLE_EXCLAMATION);
@@ -1672,7 +1671,7 @@ std::vector<std::pair<int, XrCompositionLayerQuad>> scenes::lobby::draw_gui(XrTi
 		RadioButtonWithoutCheckBox(ICON_FA_GEARS "  " + _("Settings"), &current_tab, tab::settings, {TabWidth, 0});
 		vibrate_on_hover();
 
-		if (application::get_mqsr_supported() or supports_sgsr(guess_model()))
+		if (application::get_openxr_post_processing_supported() or supports_sgsr(guess_model()))
 		{
 			RadioButtonWithoutCheckBox(ICON_FA_WAND_MAGIC_SPARKLES "  " + _("Post-processing"), &current_tab, tab::post_processing, {TabWidth, 0});
 			vibrate_on_hover();

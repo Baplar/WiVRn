@@ -925,12 +925,12 @@ void scenes::stream::render(const XrFrameState & frame_state)
 	};
 
 	XrCompositionLayerSettingsFB settings;
-	const configuration::mqsr_settings mqsr = application::get_config().mqsr;
-	if ((mqsr.sharpening | mqsr.super_sampling) > 0)
+	const configuration::openxr_post_processing_settings openxr_post_processing = application::get_config().openxr_post_processing;
+	if ((openxr_post_processing.sharpening | openxr_post_processing.super_sampling) > 0)
 	{
 		settings = {
 		        .type = XR_TYPE_COMPOSITION_LAYER_SETTINGS_FB,
-		        .layerFlags = mqsr.sharpening | mqsr.super_sampling,
+		        .layerFlags = openxr_post_processing.sharpening | openxr_post_processing.super_sampling,
 		};
 		layer.next = &settings;
 	}

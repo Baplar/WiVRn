@@ -189,8 +189,8 @@ configuration::configuration(xr::system & system)
 		if (auto val = root["sgsr"]; val.is_object())
 			parse_sgsr_options(val.get_object());
 
-		if (auto val = root["mqsr"]; val.is_object())
-			parse_mqsr_options(val.get_object());
+		if (auto val = root["openxr_post_processing"]; val.is_object())
+			parse_openxr_post_processing_options(val.get_object());
 
 		if (auto val = root["passthrough_enabled"]; val.is_bool())
 			passthrough_enabled = val.get_bool();
@@ -220,7 +220,7 @@ configuration::configuration(xr::system & system)
 		minimum_refresh_rate.reset();
 		resolution_scale = 1.4;
 		sgsr = {};
-		mqsr = {};
+		openxr_post_processing = {};
 		show_performance_metrics = false;
 		passthrough_enabled = system.passthrough_supported() == xr::system::passthrough_type::color;
 	}
@@ -245,14 +245,14 @@ void configuration::parse_sgsr_options(simdjson::simdjson_result<simdjson::dom::
 		sgsr.edge_sharpness = val.get_double();
 }
 
-void configuration::parse_mqsr_options(simdjson::simdjson_result<simdjson::dom::object> mqsr_root)
+void configuration::parse_openxr_post_processing_options(simdjson::simdjson_result<simdjson::dom::object> openxr_post_processing_root)
 {
-	mqsr = {};
-	if (auto val = mqsr_root["super_sampling"]; val.is_int64())
-		mqsr.super_sampling = val.get_int64();
+	openxr_post_processing = {};
+	if (auto val = openxr_post_processing_root["super_sampling"]; val.is_int64())
+		openxr_post_processing.super_sampling = val.get_int64();
 
-	if (auto val = mqsr_root["sharpening"]; val.is_int64())
-		mqsr.sharpening = val.get_int64();
+	if (auto val = openxr_post_processing_root["sharpening"]; val.is_int64())
+		openxr_post_processing.sharpening = val.get_int64();
 }
 
 static std::ostream & operator<<(std::ostream & stream, feature f)
@@ -271,10 +271,10 @@ static std::ostream & write_sgsr(std::ofstream & stream, const configuration::sg
 	return stream;
 }
 
-static std::ostream & write_mqsr(std::ofstream & stream, const configuration::mqsr_settings & mqsr)
+static std::ostream & write_openxr_post_processing(std::ofstream & stream, const configuration::openxr_post_processing_settings & openxr_post_processing)
 {
-	stream << "{\"super_sampling\":" << mqsr.super_sampling;
-	stream << ",\"sharpening\":" << mqsr.sharpening;
+	stream << "{\"super_sampling\":" << openxr_post_processing.super_sampling;
+	stream << ",\"sharpening\":" << openxr_post_processing.sharpening;
 	stream << "}";
 	return stream;
 }
@@ -316,8 +316,8 @@ void configuration::save()
 	json << ",\"resolution_scale\":" << resolution_scale;
 	json << ",\"sgsr\":";
 	write_sgsr(json, sgsr);
-	json << ",\"mqsr\":";
-	write_mqsr(json, mqsr);
+	json << ",\"openxr_post_processing\":";
+	write_openxr_post_processing(json, openxr_post_processing);
 	json << ",\"passthrough_enabled\":" << std::boolalpha << passthrough_enabled;
 	json << ",\"mic_unprocessed_audio\":" << std::boolalpha << mic_unprocessed_audio;
 	for (auto & [key, value]: features)

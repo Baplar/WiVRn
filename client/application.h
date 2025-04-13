@@ -135,7 +135,7 @@ class application : public singleton<application>
 
 	bool eye_gaze_supported = false;
 
-	bool mqsr_supported = false;
+	bool openxr_post_processing_supported = false;
 
 	bool session_running = false;
 	bool session_focused = false;
@@ -441,9 +441,9 @@ public:
 		return instance().eye_gaze_supported;
 	}
 
-	static bool get_mqsr_supported()
+	static bool get_openxr_post_processing_supported()
 	{
-		return instance().mqsr_supported;
+		return instance().openxr_post_processing_supported;
 	}
 
 	static xr::hand_tracker & get_left_hand()

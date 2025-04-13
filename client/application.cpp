@@ -1045,7 +1045,6 @@ void application::initialize()
 	opt_extensions.push_back(XR_KHR_COMPOSITION_LAYER_COLOR_SCALE_BIAS_EXTENSION_NAME);
 	opt_extensions.push_back(XR_KHR_VISIBILITY_MASK_EXTENSION_NAME);
 	opt_extensions.push_back(XR_FB_COMPOSITION_LAYER_SETTINGS_EXTENSION_NAME);
-	opt_extensions.push_back(XR_META_AUTOMATIC_LAYER_FILTER_EXTENSION_NAME);
 
 	for (const auto & i: interaction_profiles)
 	{
@@ -1124,8 +1123,8 @@ void application::initialize()
 
 	if (utils::contains(xr_extensions, XR_FB_COMPOSITION_LAYER_SETTINGS_EXTENSION_NAME))
 	{
-		spdlog::info("    Meta composition layer settings support: true");
-		mqsr_supported = true;
+		spdlog::info("    OpenXR post-processing extension support: true");
+		openxr_post_processing_supported = true;
 	}
 
 	switch (xr_system_id.passthrough_supported())

@@ -192,9 +192,6 @@ bool supports_sgsr(model m)
 		case model::meta_quest_pro:
 		case model::meta_quest_3:
 		case model::meta_quest_3s:
-			// All Quest headsets implement the MQSR extension and will use it instead of SGSR,
-			// but they technically support it thanks to having an XR2
-			[[fallthrough]];
 		case model::pico_neo_3:
 		case model::pico_4:
 		case model::pico_4s:
@@ -202,7 +199,10 @@ bool supports_sgsr(model m)
 		case model::htc_vive_focus_vision:
 		case model::htc_vive_xr_elite:
 		case model::lynx_r1:
-		case model::unknown: // Taking a gamble on the user knowing what they’re doing
+			// All of these have at least an XR2, they can support it
+			return true;
+		case model::unknown:
+			// Taking a gamble on the user knowing what they’re doing
 			return true;
 	}
 	throw std::range_error("invalid model " + std::to_string((int)m));

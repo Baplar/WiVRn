@@ -83,7 +83,7 @@ sleep 1
 exec grim -g "0,0 2560x1440" ${LANG}/screenshot-04-settings.png
 
 # Post-processing
-set right direction -1.93 1.4 -1
+set right direction -1.95 1.45 -1
 sleep 1
 set right trigger_value 1
 sleep 1

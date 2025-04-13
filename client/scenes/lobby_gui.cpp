@@ -128,12 +128,12 @@ std::string openxr_post_processing_flag_name(XrCompositionLayerSettingsFlagsFB f
 	{
 		case XR_COMPOSITION_LAYER_SETTINGS_NORMAL_SUPER_SAMPLING_BIT_FB:
 		case XR_COMPOSITION_LAYER_SETTINGS_NORMAL_SHARPENING_BIT_FB:
-			return boost::locale::pgettext("openxr_post_processing", "Normal");
+			return _cS("openxr_post_processing", "Normal");
 		case XR_COMPOSITION_LAYER_SETTINGS_QUALITY_SUPER_SAMPLING_BIT_FB:
 		case XR_COMPOSITION_LAYER_SETTINGS_QUALITY_SHARPENING_BIT_FB:
-			return boost::locale::pgettext("openxr_post_processing", "Quality");
+			return _cS("openxr_post_processing", "Quality");
 		default:
-			return boost::locale::pgettext("openxr_post_processing", "Disabled");
+			return _cS("openxr_post_processing", "Disabled");
 	}
 }
 

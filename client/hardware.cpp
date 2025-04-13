@@ -181,33 +181,6 @@ bool need_srgb_conversion(model m)
 	throw std::range_error("invalid model " + std::to_string((int)m));
 }
 
-bool supports_sgsr(model m)
-{
-	switch (m)
-	{
-		case model::oculus_quest:
-			// Processor weaker than XR2, unsupported
-			return false;
-		case model::oculus_quest_2:
-		case model::meta_quest_pro:
-		case model::meta_quest_3:
-		case model::meta_quest_3s:
-		case model::pico_neo_3:
-		case model::pico_4:
-		case model::pico_4s:
-		case model::htc_vive_focus_3:
-		case model::htc_vive_focus_vision:
-		case model::htc_vive_xr_elite:
-		case model::lynx_r1:
-			// All of these have at least an XR2, they can support it
-			return true;
-		case model::unknown:
-			// Taking a gamble on the user knowing what they’re doing
-			return true;
-	}
-	throw std::range_error("invalid model " + std::to_string((int)m));
-}
-
 const char * permission_name(feature f)
 {
 	switch (f)

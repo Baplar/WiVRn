@@ -865,14 +865,12 @@ void scenes::lobby::gui_post_processing()
 			}
 		}
 	}
-	if (supports_sgsr(guess_model()))
+
 	{
 		// SGSR
 		{
-			bool enabled = config.sgsr.enabled;
-			if (ImGui::Checkbox(_S("Enable Snapdragon Game Super Resolution"), &enabled))
+			if (ImGui::Checkbox(_S("Enable Snapdragon Game Super Resolution"), &config.sgsr.enabled))
 			{
-				config.sgsr.enabled = enabled;
 				config.save();
 			}
 			vibrate_on_hover();
@@ -918,10 +916,8 @@ void scenes::lobby::gui_post_processing()
 				}
 			}
 			{
-				bool enabled = config.sgsr.use_edge_direction;
-				if (ImGui::Checkbox(_S("Use edge direction"), &enabled))
+				if (ImGui::Checkbox(_S("Use edge direction"), &config.sgsr.use_edge_direction))
 				{
-					config.sgsr.use_edge_direction = enabled;
 					config.save();
 				}
 				vibrate_on_hover();
@@ -941,10 +937,8 @@ void scenes::lobby::gui_post_processing()
 					tooltip(fmt::format(_F("Recommended: {:.1f}"), 4.0).c_str());
 			}
 			{
-				float current = config.sgsr.edge_sharpness;
-				if (ImGui::SliderFloat(_S("Edge sharpness"), &current, 1.0, 2.0, "%.2f"))
+				if (ImGui::SliderFloat(_S("Edge sharpness"), &config.sgsr.edge_sharpness, 1.0, 2.0, "%.2f"))
 				{
-					config.sgsr.edge_sharpness = current;
 					config.save();
 				}
 				vibrate_on_hover();
@@ -1671,11 +1665,8 @@ std::vector<std::pair<int, XrCompositionLayerQuad>> scenes::lobby::draw_gui(XrTi
 		RadioButtonWithoutCheckBox(ICON_FA_GEARS "  " + _("Settings"), &current_tab, tab::settings, {TabWidth, 0});
 		vibrate_on_hover();
 
-		if (application::get_openxr_post_processing_supported() or supports_sgsr(guess_model()))
-		{
-			RadioButtonWithoutCheckBox(ICON_FA_WAND_MAGIC_SPARKLES "  " + _("Post-processing"), &current_tab, tab::post_processing, {TabWidth, 0});
-			vibrate_on_hover();
-		}
+		RadioButtonWithoutCheckBox(ICON_FA_WAND_MAGIC_SPARKLES "  " + _("Post-processing"), &current_tab, tab::post_processing, {TabWidth, 0});
+		vibrate_on_hover();
 
 #if WIVRN_CLIENT_DEBUG_MENU
 		RadioButtonWithoutCheckBox(ICON_FA_BUG_SLASH "  " + _("Debug"), &current_tab, tab::debug, {TabWidth, 0});

@@ -160,8 +160,16 @@ void scenes::lobby::tooltip(std::string_view text)
 	const ImVec2 text_size = ImGui::CalcTextSize(text.data(), text.data() + text.size(), true);
 	const ImVec2 size = {text_size.x + style.WindowPadding.x * 2.0f, text_size.y + style.WindowPadding.y * 2.0f};
 	pos.x = std::min(pos.x, viewport->Pos.x + viewport->Size.x - size.x / 2);
+	ImVec2 pivot = {0.5, 1};
 
-	ImGui::SetNextWindowPos(pos, ImGuiCond_Always, {0.5, 1});
+	// Move tooltip below the item if it overflows on the top
+	if (pos.y - size.y <= viewport->Pos.y)
+	{
+		pos.y = ImGui::GetItemRectMax().y + constants::style::tooltip_distance;
+		pivot.y = 0;
+	}
+
+	ImGui::SetNextWindowPos(pos, ImGuiCond_Always, pivot);
 	if (ImGui::BeginTooltip())
 	{
 		ImGui::PushStyleColor(ImGuiCol_Text, 0xffffffff);
@@ -814,6 +822,8 @@ void scenes::lobby::gui_post_processing()
 
 	if (application::get_openxr_post_processing_supported())
 	{
+		ImGui::Text("%s", _S("OpenXR post-processing"));
+		ImGui::Indent();
 		{
 			XrCompositionLayerSettingsFlagsFB current = config.openxr_post_processing.super_sampling;
 			if (ImGui::BeginCombo(_S("Supersampling"), openxr_post_processing_flag_name(current).c_str()))
@@ -864,6 +874,7 @@ void scenes::lobby::gui_post_processing()
 				tooltip(_("Improve clarity of high contrast edges and counteract blur.\nUseful when the input resolution is low compared to the headset display"));
 			}
 		}
+		ImGui::Unindent();
 	}
 
 	{

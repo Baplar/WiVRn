@@ -18,12 +18,10 @@
  */
 
 #include "configuration.h"
-
 #include "application.h"
-#include "hardware.h"
+
 #include <fstream>
 #include <magic_enum.hpp>
-#include <simdjson.h>
 
 #ifdef __ANDROID__
 #include "android/permissions.h"
@@ -188,20 +186,11 @@ configuration::configuration(xr::system & system)
 		if (auto val = root["resolution_scale"]; val.is_double())
 			resolution_scale = val.get_double();
 
-		if (auto val = root["use_upscaling"]; val.is_bool())
-			use_upscaling = val.get_bool();
+		if (auto val = root["sgsr"]; val.is_object())
+			parse_sgsr_options(val.get_object());
 
-		if (auto val = root["upscaling_factor"]; val.is_double())
-			upscaling_factor = val.get_double();
-
-		if (auto val = root["use_edge_direction"]; val.is_bool())
-			use_edge_direction = val.get_bool();
-
-		if (auto val = root["edge_threshold"]; val.is_double())
-			edge_threshold = val.get_double();
-
-		if (auto val = root["edge_sharpness"]; val.is_double())
-			edge_sharpness = val.get_double();
+		if (auto val = root["mqsr"]; val.is_object())
+			parse_mqsr_options(val.get_object());
 
 		if (auto val = root["passthrough_enabled"]; val.is_bool())
 			passthrough_enabled = val.get_bool();
@@ -230,19 +219,68 @@ configuration::configuration(xr::system & system)
 		preferred_refresh_rate.reset();
 		minimum_refresh_rate.reset();
 		resolution_scale = 1.4;
-		use_upscaling = false;
-		upscaling_factor = 1.5;
-		use_edge_direction = true;
-		edge_threshold = 4.0;
-		edge_sharpness = 2.0;
+		sgsr = {};
+		mqsr = {};
 		show_performance_metrics = false;
 		passthrough_enabled = system.passthrough_supported() == xr::system::passthrough_type::color;
 	}
 }
 
+void configuration::parse_sgsr_options(simdjson::simdjson_result<simdjson::dom::object> sgsr_root)
+{
+	sgsr = {};
+	if (auto val = sgsr_root["enabled"]; val.is_bool())
+		sgsr.enabled = val.get_bool();
+
+	if (auto val = sgsr_root["upscaling_factor"]; val.is_double())
+		sgsr.upscaling_factor = val.get_double();
+
+	if (auto val = sgsr_root["use_edge_direction"]; val.is_bool())
+		sgsr.use_edge_direction = val.get_bool();
+
+	if (auto val = sgsr_root["edge_threshold"]; val.is_double())
+		sgsr.edge_threshold = val.get_double();
+
+	if (auto val = sgsr_root["edge_sharpness"]; val.is_double())
+		sgsr.edge_sharpness = val.get_double();
+}
+
+void configuration::parse_mqsr_options(simdjson::simdjson_result<simdjson::dom::object> mqsr_root)
+{
+	mqsr = {};
+	if (auto val = mqsr_root["super_sampling"]; val.is_int64())
+		mqsr.super_sampling = val.get_int64();
+
+	if (auto val = mqsr_root["sharpening"]; val.is_int64())
+		mqsr.sharpening = val.get_int64();
+
+	if (auto val = mqsr_root["auto_filtering"]; val.is_bool())
+		mqsr.auto_filtering = val.get_bool();
+}
+
 static std::ostream & operator<<(std::ostream & stream, feature f)
 {
 	return stream << "\"" << magic_enum::enum_name(f) << "\"";
+}
+
+static std::ostream & write_sgsr(std::ofstream & stream, const configuration::sgsr_settings & sgsr)
+{
+	stream << "{\"enabled\":" << std::boolalpha << sgsr.enabled;
+	stream << ",\"upscaling_factor\":" << sgsr.upscaling_factor;
+	stream << ",\"use_edge_direction\":" << std::boolalpha << sgsr.use_edge_direction;
+	stream << ",\"edge_threshold\":" << sgsr.edge_threshold;
+	stream << ",\"edge_sharpness\":" << sgsr.edge_sharpness;
+	stream << "}";
+	return stream;
+}
+
+static std::ostream & write_mqsr(std::ofstream & stream, const configuration::mqsr_settings & mqsr)
+{
+	stream << "{\"super_sampling\":" << mqsr.super_sampling;
+	stream << ",\"sharpening\":" << mqsr.sharpening;
+	stream << ",\"auto_filtering\":" << std::boolalpha << mqsr.auto_filtering;
+	stream << "}";
+	return stream;
 }
 
 void configuration::save()
@@ -280,11 +318,10 @@ void configuration::save()
 	if (minimum_refresh_rate)
 		json << ",\"minimum_refresh_rate\":" << *minimum_refresh_rate;
 	json << ",\"resolution_scale\":" << resolution_scale;
-	json << ",\"use_upscaling\":" << std::boolalpha << use_upscaling;
-	json << ",\"upscaling_factor\":" << upscaling_factor;
-	json << ",\"use_edge_direction\":" << std::boolalpha << use_edge_direction;
-	json << ",\"edge_threshold\":" << edge_threshold;
-	json << ",\"edge_sharpness\":" << edge_sharpness;
+	json << ",\"sgsr\":";
+	write_sgsr(json, sgsr);
+	json << ",\"mqsr\":";
+	write_mqsr(json, mqsr);
 	json << ",\"passthrough_enabled\":" << std::boolalpha << passthrough_enabled;
 	json << ",\"mic_unprocessed_audio\":" << std::boolalpha << mic_unprocessed_audio;
 	for (auto & [key, value]: features)

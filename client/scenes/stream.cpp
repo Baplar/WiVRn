@@ -925,11 +925,15 @@ void scenes::stream::render(const XrFrameState & frame_state)
 	};
 
 	XrCompositionLayerSettingsFB settings;
-	if (instance.has_extension(XR_FB_COMPOSITION_LAYER_SETTINGS_EXTENSION_NAME))
+	const configuration::mqsr_settings mqsr = application::get_config().mqsr;
+	if ((mqsr.sharpening | mqsr.super_sampling) > 0)
 	{
+		XrCompositionLayerSettingsFlagsFB layer_settings_flags = mqsr.sharpening | mqsr.super_sampling;
+		if (mqsr.auto_filtering)
+			layer_settings_flags |= XR_COMPOSITION_LAYER_SETTINGS_AUTO_LAYER_FILTER_BIT_META;
 		settings = {
 		        .type = XR_TYPE_COMPOSITION_LAYER_SETTINGS_FB,
-		        .layerFlags = XR_COMPOSITION_LAYER_SETTINGS_QUALITY_SUPER_SAMPLING_BIT_FB | XR_COMPOSITION_LAYER_SETTINGS_QUALITY_SHARPENING_BIT_FB,
+		        .layerFlags = layer_settings_flags,
 		};
 		layer.next = &settings;
 	}
@@ -1161,9 +1165,10 @@ void scenes::stream::setup_reprojection_swapchain()
 	uint32_t swapchain_width = video_width / video_stream_description->foveation[0].x.scale;
 	uint32_t swapchain_height = video_height / video_stream_description->foveation[0].y.scale;
 
-	if (application::get_config().use_upscaling and not instance.has_extension(XR_FB_COMPOSITION_LAYER_SETTINGS_EXTENSION_NAME))
+	const configuration::sgsr_settings sgsr = application::get_config().sgsr;
+	if (sgsr.enabled)
 	{
-		const float upscaling_factor = application::get_config().upscaling_factor;
+		const float upscaling_factor = sgsr.upscaling_factor;
 		spdlog::info("Using SGSR with an upscale factor of {}", upscaling_factor);
 		swapchain_width *= upscaling_factor;
 		swapchain_height *= upscaling_factor;

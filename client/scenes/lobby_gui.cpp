@@ -122,6 +122,21 @@ static void display_recentering_tip(imgui_context & ctx, const std::string & tip
 	ImGui::PopFont();
 }
 
+std::string mqsr_flag_name(XrCompositionLayerSettingsFlagsFB flag)
+{
+	switch (flag)
+	{
+		case XR_COMPOSITION_LAYER_SETTINGS_NORMAL_SUPER_SAMPLING_BIT_FB:
+		case XR_COMPOSITION_LAYER_SETTINGS_NORMAL_SHARPENING_BIT_FB:
+			return _("Normal##mqsr_normal");
+		case XR_COMPOSITION_LAYER_SETTINGS_QUALITY_SUPER_SAMPLING_BIT_FB:
+		case XR_COMPOSITION_LAYER_SETTINGS_QUALITY_SHARPENING_BIT_FB:
+			return _("Quality##mqsr_quality");
+		default:
+			return _("Disabled##mqsr_disabled");
+	}
+}
+
 void scenes::lobby::tooltip(std::string_view text)
 {
 	// FIXME: this is incorrect if we use the docking branch of imgui
@@ -655,88 +670,6 @@ void scenes::lobby::gui_settings()
 		}
 	}
 
-	bool sgsr_supported = supports_sgsr(guess_model());
-	bool mqsr_supported = instance.has_extension(XR_FB_COMPOSITION_LAYER_SETTINGS_EXTENSION_NAME);
-
-	if (sgsr_supported or mqsr_supported)
-	{
-		{
-			bool enabled = config.use_upscaling;
-			if (ImGui::Checkbox(_S("Enable client-side upscaling"), &enabled))
-			{
-				config.use_upscaling = enabled;
-				config.save();
-			}
-			vibrate_on_hover();
-			if (ImGui::IsItemHovered())
-				tooltip(_("Adds a performance cost on the headset side"));
-		}
-
-		if (config.use_upscaling and not mqsr_supported)
-		{
-			ImGui::Indent();
-			{
-				const auto current = config.upscaling_factor;
-				const auto width = stream_view.recommendedImageRectWidth * config.resolution_scale;
-				const auto height = stream_view.recommendedImageRectHeight * config.resolution_scale;
-				auto intScale = int(current * 100);
-				const auto slider = ImGui::SliderInt(
-				        _("Upscaling factor").append("##upscaling_factor").c_str(),
-				        &intScale,
-				        100,
-				        200,
-				        fmt::format(_F("%d%% - {}x{} per eye"), int(width * current), int(height * current)).c_str());
-				if (slider)
-				{
-					config.upscaling_factor = intScale * 0.01;
-					config.save();
-				}
-				vibrate_on_hover();
-				if (width * config.upscaling_factor > stream_view.maxImageRectWidth or height * config.upscaling_factor > stream_view.maxImageRectHeight)
-				{
-					ImGui::TextColored(ImColor(0xf9, 0x73, 0x06) /*orange*/, ICON_FA_TRIANGLE_EXCLAMATION);
-					ImGui::SameLine();
-					ImGui::Text("%s", fmt::format(_F("Resolution larger than {}x{} may not be supported by the headset"), stream_view.maxImageRectWidth, stream_view.maxImageRectHeight).c_str());
-				}
-			}
-			{
-				bool enabled = config.use_edge_direction;
-				if (ImGui::Checkbox(_S("Use edge direction"), &enabled))
-				{
-					config.use_edge_direction = enabled;
-					config.save();
-				}
-				vibrate_on_hover();
-				if (ImGui::IsItemHovered())
-					tooltip(_("Adds a small additional performance cost"));
-			}
-			{
-				const float current = config.edge_threshold;
-				int intScale = int(current);
-				if (ImGui::SliderInt(_S("Edge threshold"), &intScale, 1, 16, "%d.0"))
-				{
-					config.edge_threshold = float(intScale);
-					config.save();
-				}
-				vibrate_on_hover();
-				if (ImGui::IsItemHovered())
-					tooltip(fmt::format(_F("Recommended: {:.1f}"), 4.0).c_str());
-			}
-			{
-				float current = config.edge_sharpness;
-				if (ImGui::SliderFloat(_S("Edge sharpness"), &current, 1.0, 2.0, "%.2f"))
-				{
-					config.edge_sharpness = current;
-					config.save();
-				}
-				vibrate_on_hover();
-				if (ImGui::IsItemHovered())
-					tooltip(_(fmt::format(_F("Recommended: {:.1f}"), 2.0).c_str()));
-			}
-			ImGui::Unindent();
-		}
-	}
-
 	{
 		bool enabled = config.check_feature(feature::microphone);
 		if (ImGui::Checkbox(_S("Enable microphone"), &enabled))
@@ -871,6 +804,153 @@ void scenes::lobby::gui_settings()
 		}
 		ImPlot::PopStyleColor(5);
 	}
+}
+
+void scenes::lobby::gui_post_processing()
+{
+	auto & config = application::get_config();
+
+	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(20, 20));
+
+	if (application::get_mqsr_supported())
+	{
+		// MQSR
+		{
+			XrCompositionLayerSettingsFlagsFB current = config.mqsr.super_sampling;
+			if (ImGui::BeginCombo(_S("Supersampling"), mqsr_flag_name(current).c_str()))
+			{
+				const XrCompositionLayerSettingsFlagsFB selectable_options[]{
+				        0,
+				        XR_COMPOSITION_LAYER_SETTINGS_NORMAL_SUPER_SAMPLING_BIT_FB,
+				        XR_COMPOSITION_LAYER_SETTINGS_QUALITY_SUPER_SAMPLING_BIT_FB};
+				for (XrCompositionLayerSettingsFlagsFB option: selectable_options)
+				{
+					if (ImGui::Selectable(mqsr_flag_name(option).c_str(), current == option, ImGuiSelectableFlags_SelectOnRelease))
+					{
+						config.mqsr.super_sampling = option;
+						config.save();
+					}
+					vibrate_on_hover();
+				}
+				ImGui::EndCombo();
+			}
+			vibrate_on_hover();
+		}
+		{
+			XrCompositionLayerSettingsFlagsFB current = config.mqsr.sharpening;
+			if (ImGui::BeginCombo(_S("Sharpening"), mqsr_flag_name(current).c_str()))
+			{
+				const XrCompositionLayerSettingsFlagsFB selectable_options[]{
+				        0,
+				        XR_COMPOSITION_LAYER_SETTINGS_NORMAL_SHARPENING_BIT_FB,
+				        XR_COMPOSITION_LAYER_SETTINGS_QUALITY_SHARPENING_BIT_FB};
+				for (XrCompositionLayerSettingsFlagsFB option: selectable_options)
+				{
+					if (ImGui::Selectable(mqsr_flag_name(option).c_str(), current == option, ImGuiSelectableFlags_SelectOnRelease))
+					{
+						config.mqsr.sharpening = option;
+						config.save();
+					}
+					vibrate_on_hover();
+				}
+				ImGui::EndCombo();
+			}
+			vibrate_on_hover();
+		}
+		if (application::get_mqsr_auto_filter_supported())
+		{
+			ImGui::BeginDisabled((config.mqsr.super_sampling | config.mqsr.sharpening) == 0);
+			bool enabled = config.mqsr.auto_filtering;
+			if (ImGui::Checkbox(_S("Additional automatic texture filtering"), &enabled))
+			{
+				config.mqsr.auto_filtering = enabled;
+				config.save();
+			}
+			vibrate_on_hover();
+			ImGui::EndDisabled();
+		}
+	}
+	if (supports_sgsr(guess_model()))
+	{
+		// SGSR
+		{
+			bool enabled = config.sgsr.enabled;
+			if (ImGui::Checkbox(_S("Enable Snapdragon Game Super Resolution"), &enabled))
+			{
+				config.sgsr.enabled = enabled;
+				config.save();
+			}
+			vibrate_on_hover();
+			if (ImGui::IsItemHovered())
+				tooltip(_("Client-side upscaling and sharpening, adds a performance cost on the headset"));
+		}
+
+		{
+			ImGui::BeginDisabled(not config.sgsr.enabled);
+			ImGui::Indent();
+			{
+				const auto current = config.sgsr.upscaling_factor;
+				const auto width = stream_view.recommendedImageRectWidth * config.resolution_scale;
+				const auto height = stream_view.recommendedImageRectHeight * config.resolution_scale;
+				auto intScale = int(current * 100);
+				const auto slider = ImGui::SliderInt(
+				        _("Upscaling factor").append("##upscaling_factor").c_str(),
+				        &intScale,
+				        100,
+				        200,
+				        fmt::format(_F("%d%% - {}x{} per eye"), int(width * current), int(height * current)).c_str());
+				if (slider)
+				{
+					config.sgsr.upscaling_factor = intScale * 0.01;
+					config.save();
+				}
+				vibrate_on_hover();
+				if (width * current > stream_view.maxImageRectWidth or height * current > stream_view.maxImageRectHeight)
+				{
+					ImGui::TextColored(ImColor(0xf9, 0x73, 0x06) /*orange*/, ICON_FA_TRIANGLE_EXCLAMATION);
+					ImGui::SameLine();
+					ImGui::Text("%s", fmt::format(_F("Resolution larger than {}x{} may not be supported by the headset"), stream_view.maxImageRectWidth, stream_view.maxImageRectHeight).c_str());
+				}
+			}
+			{
+				bool enabled = config.sgsr.use_edge_direction;
+				if (ImGui::Checkbox(_S("Use edge direction"), &enabled))
+				{
+					config.sgsr.use_edge_direction = enabled;
+					config.save();
+				}
+				vibrate_on_hover();
+				if (ImGui::IsItemHovered())
+					tooltip(_("Adds an additional performance cost"));
+			}
+			{
+				const float current = config.sgsr.edge_threshold;
+				int intScale = int(current);
+				if (ImGui::SliderInt(_S("Edge threshold"), &intScale, 1, 16, "%d.0"))
+				{
+					config.sgsr.edge_threshold = float(intScale);
+					config.save();
+				}
+				vibrate_on_hover();
+				if (ImGui::IsItemHovered())
+					tooltip(fmt::format(_F("Recommended: {:.1f}"), 4.0).c_str());
+			}
+			{
+				float current = config.sgsr.edge_sharpness;
+				if (ImGui::SliderFloat(_S("Edge sharpness"), &current, 1.0, 2.0, "%.2f"))
+				{
+					config.sgsr.edge_sharpness = current;
+					config.save();
+				}
+				vibrate_on_hover();
+				if (ImGui::IsItemHovered())
+					tooltip(_(fmt::format(_F("Recommended: {:.1f}"), 2.0).c_str()));
+			}
+			ImGui::Unindent();
+			ImGui::EndDisabled();
+		}
+	}
+	ImGui::PopStyleVar();
 }
 
 #if WIVRN_CLIENT_DEBUG_MENU
@@ -1538,6 +1618,10 @@ std::vector<std::pair<int, XrCompositionLayerQuad>> scenes::lobby::draw_gui(XrTi
 				gui_settings();
 				break;
 
+			case tab::post_processing:
+				gui_post_processing();
+				break;
+
 #if WIVRN_CLIENT_DEBUG_MENU
 			case tab::debug:
 				gui_debug();
@@ -1581,6 +1665,12 @@ std::vector<std::pair<int, XrCompositionLayerQuad>> scenes::lobby::draw_gui(XrTi
 
 		RadioButtonWithoutCheckBox(ICON_FA_GEARS "  " + _("Settings"), &current_tab, tab::settings, {TabWidth, 0});
 		vibrate_on_hover();
+
+		if (application::get_mqsr_supported() or supports_sgsr(guess_model()))
+		{
+			RadioButtonWithoutCheckBox(ICON_FA_WAND_MAGIC_SPARKLES "  " + _("Post-processing"), &current_tab, tab::post_processing, {TabWidth, 0});
+			vibrate_on_hover();
+		}
 
 #if WIVRN_CLIENT_DEBUG_MENU
 		RadioButtonWithoutCheckBox(ICON_FA_BUG_SLASH "  " + _("Debug"), &current_tab, tab::debug, {TabWidth, 0});

@@ -288,14 +288,15 @@ stream_reprojection::stream_reprojection(
 	vk::SpecializationInfo fragment_specialization_info;
 	SgsrSpecializationConstants fragment_specialization_constants;
 	std::vector<vk::SpecializationMapEntry> fragment_specialization_constants_desc;
-	if (application::get_config().use_upscaling)
+	const configuration::sgsr_settings sgsr = application::get_config().sgsr;
+	if (sgsr.enabled)
 	{
 		fragment_shader_name = "reprojection_sgsr.frag";
 
 		fragment_specialization_constants = {
-		        .use_edge_direction = application::get_config().use_edge_direction,
-		        .edge_threshold = float(application::get_config().edge_threshold / 255.0),
-		        .edge_sharpness = application::get_config().edge_sharpness,
+		        .use_edge_direction = sgsr.use_edge_direction,
+		        .edge_threshold = float(sgsr.edge_threshold / 255.0),
+		        .edge_sharpness = sgsr.edge_sharpness,
 		};
 
 		fragment_specialization_constants_desc = {

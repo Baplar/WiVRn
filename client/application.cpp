@@ -1045,6 +1045,7 @@ void application::initialize()
 	opt_extensions.push_back(XR_KHR_COMPOSITION_LAYER_COLOR_SCALE_BIAS_EXTENSION_NAME);
 	opt_extensions.push_back(XR_KHR_VISIBILITY_MASK_EXTENSION_NAME);
 	opt_extensions.push_back(XR_FB_COMPOSITION_LAYER_SETTINGS_EXTENSION_NAME);
+	opt_extensions.push_back(XR_META_AUTOMATIC_LAYER_FILTER_EXTENSION_NAME);
 
 	for (const auto & i: interaction_profiles)
 	{
@@ -1119,6 +1120,17 @@ void application::initialize()
 		spdlog::info("    HTC lip tracking support: {}", (bool)htc_face_properties.supportLipFacialTracking);
 		htc_face_tracking_eye_supported = htc_face_properties.supportEyeFacialTracking;
 		htc_face_tracking_lip_supported = htc_face_properties.supportLipFacialTracking;
+	}
+
+	if (utils::contains(xr_extensions, XR_FB_COMPOSITION_LAYER_SETTINGS_EXTENSION_NAME))
+	{
+		spdlog::info("    Meta composition layer settings support: true");
+		mqsr_supported = true;
+		if (utils::contains(xr_extensions, XR_META_AUTOMATIC_LAYER_FILTER_EXTENSION_NAME))
+		{
+			spdlog::info("    Meta automatic layer filter extension support: true");
+			mqsr_auto_filter_supported = true;
+		}
 	}
 
 	switch (xr_system_id.passthrough_supported())

@@ -25,6 +25,7 @@
 #include <map>
 #include <mutex>
 #include <optional>
+#include <simdjson.h>
 #include <string>
 
 namespace xr
@@ -53,11 +54,23 @@ public:
 	bool passthrough_enabled = false;
 	bool mic_unprocessed_audio = false;
 
-	bool use_upscaling = false;
-	float upscaling_factor = 1.5;
-	bool use_edge_direction = true;
-	float edge_threshold = 4.0;
-	float edge_sharpness = 2.0;
+	struct sgsr_settings
+	{
+		bool enabled = false;
+		float upscaling_factor = 1.5;
+		bool use_edge_direction = true;
+		float edge_threshold = 4.0;
+		float edge_sharpness = 2.0;
+	};
+	sgsr_settings sgsr{};
+
+	struct mqsr_settings
+	{
+		XrCompositionLayerSettingsFlagsFB super_sampling = 0;
+		XrCompositionLayerSettingsFlagsFB sharpening = 0;
+		bool auto_filtering = false;
+	};
+	mqsr_settings mqsr{};
 
 	std::string virtual_keyboard_layout = "QWERTY";
 
@@ -67,6 +80,9 @@ public:
 private:
 	mutable std::mutex mutex;
 	std::map<feature, bool> features;
+
+	void parse_sgsr_options(simdjson::simdjson_result<simdjson::dom::object> root);
+	void parse_mqsr_options(simdjson::simdjson_result<simdjson::dom::object> root);
 
 public:
 	configuration(xr::system &);

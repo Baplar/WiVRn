@@ -128,12 +128,12 @@ std::string openxr_post_processing_flag_name(XrCompositionLayerSettingsFlagsFB f
 	{
 		case XR_COMPOSITION_LAYER_SETTINGS_NORMAL_SUPER_SAMPLING_BIT_FB:
 		case XR_COMPOSITION_LAYER_SETTINGS_NORMAL_SHARPENING_BIT_FB:
-			return _("Normal##openxr_post_processing_normal");
+			return boost::locale::pgettext("openxr_post_processing", "Normal");
 		case XR_COMPOSITION_LAYER_SETTINGS_QUALITY_SUPER_SAMPLING_BIT_FB:
 		case XR_COMPOSITION_LAYER_SETTINGS_QUALITY_SHARPENING_BIT_FB:
-			return _("Quality##openxr_post_processing_quality");
+			return boost::locale::pgettext("openxr_post_processing", "Quality");
 		default:
-			return _("Disabled##openxr_post_processing_disabled");
+			return boost::locale::pgettext("openxr_post_processing", "Disabled");
 	}
 }
 
@@ -945,7 +945,7 @@ void scenes::lobby::gui_post_processing()
 				}
 				vibrate_on_hover();
 				if (ImGui::IsItemHovered())
-					tooltip(fmt::format(_F("Recommended: {:.1f}"), 4.0).c_str());
+					tooltip(fmt::format(_F("Recommended: {:.1f}"), 4.0));
 			}
 			{
 				if (ImGui::SliderFloat(_S("Edge sharpness"), &config.sgsr.edge_sharpness, 1.0, 2.0, "%.2f"))
@@ -954,7 +954,7 @@ void scenes::lobby::gui_post_processing()
 				}
 				vibrate_on_hover();
 				if (ImGui::IsItemHovered())
-					tooltip(_(fmt::format(_F("Recommended: {:.1f}"), 2.0).c_str()));
+					tooltip(fmt::format(_F("Recommended: {:.1f}"), 2.0));
 			}
 			ImGui::Unindent();
 			ImGui::EndDisabled();

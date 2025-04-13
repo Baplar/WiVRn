@@ -68,7 +68,6 @@ public:
 	{
 		XrCompositionLayerSettingsFlagsFB super_sampling = 0;
 		XrCompositionLayerSettingsFlagsFB sharpening = 0;
-		bool auto_filtering = false;
 	};
 	mqsr_settings mqsr{};
 

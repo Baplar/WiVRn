@@ -835,6 +835,10 @@ void scenes::lobby::gui_post_processing()
 				ImGui::EndCombo();
 			}
 			vibrate_on_hover();
+			if (ImGui::IsItemHovered())
+			{
+				tooltip(_("Reduce flicker for high contrast edges.\nUseful when the input resolution is high compared to the headset display"));
+			}
 		}
 		{
 			XrCompositionLayerSettingsFlagsFB current = config.mqsr.sharpening;
@@ -856,18 +860,10 @@ void scenes::lobby::gui_post_processing()
 				ImGui::EndCombo();
 			}
 			vibrate_on_hover();
-		}
-		if (application::get_mqsr_auto_filter_supported())
-		{
-			ImGui::BeginDisabled((config.mqsr.super_sampling | config.mqsr.sharpening) == 0);
-			bool enabled = config.mqsr.auto_filtering;
-			if (ImGui::Checkbox(_S("Additional automatic texture filtering"), &enabled))
+			if (ImGui::IsItemHovered())
 			{
-				config.mqsr.auto_filtering = enabled;
-				config.save();
+				tooltip(_("Improve clarity of high contrast edges and counteract blur.\nUseful when the input resolution is low compared to the headset display"));
 			}
-			vibrate_on_hover();
-			ImGui::EndDisabled();
 		}
 	}
 	if (supports_sgsr(guess_model()))
@@ -882,7 +878,17 @@ void scenes::lobby::gui_post_processing()
 			}
 			vibrate_on_hover();
 			if (ImGui::IsItemHovered())
-				tooltip(_("Client-side upscaling and sharpening, adds a performance cost on the headset"));
+			{
+				if (application::get_mqsr_supported())
+					tooltip(_("On this headset, this setting has been fully superseded by the native Sharpening setting above.\nOnly enable if you know what you’re doing."));
+				else
+					tooltip(_("Client-side upscaling and sharpening, adds a performance cost on the headset"));
+			}
+			if (application::get_mqsr_supported())
+			{
+				ImGui::SameLine();
+				ImGui::TextColored(ImColor(0xf9, 0x73, 0x06) /*orange*/, ICON_FA_TRIANGLE_EXCLAMATION);
+			}
 		}
 
 		{

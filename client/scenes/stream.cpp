@@ -928,12 +928,9 @@ void scenes::stream::render(const XrFrameState & frame_state)
 	const configuration::mqsr_settings mqsr = application::get_config().mqsr;
 	if ((mqsr.sharpening | mqsr.super_sampling) > 0)
 	{
-		XrCompositionLayerSettingsFlagsFB layer_settings_flags = mqsr.sharpening | mqsr.super_sampling;
-		if (mqsr.auto_filtering)
-			layer_settings_flags |= XR_COMPOSITION_LAYER_SETTINGS_AUTO_LAYER_FILTER_BIT_META;
 		settings = {
 		        .type = XR_TYPE_COMPOSITION_LAYER_SETTINGS_FB,
-		        .layerFlags = layer_settings_flags,
+		        .layerFlags = mqsr.sharpening | mqsr.super_sampling,
 		};
 		layer.next = &settings;
 	}

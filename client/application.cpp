@@ -1126,11 +1126,6 @@ void application::initialize()
 	{
 		spdlog::info("    Meta composition layer settings support: true");
 		mqsr_supported = true;
-		if (utils::contains(xr_extensions, XR_META_AUTOMATIC_LAYER_FILTER_EXTENSION_NAME))
-		{
-			spdlog::info("    Meta automatic layer filter extension support: true");
-			mqsr_auto_filter_supported = true;
-		}
 	}
 
 	switch (xr_system_id.passthrough_supported())

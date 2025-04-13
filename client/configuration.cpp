@@ -253,9 +253,6 @@ void configuration::parse_mqsr_options(simdjson::simdjson_result<simdjson::dom::
 
 	if (auto val = mqsr_root["sharpening"]; val.is_int64())
 		mqsr.sharpening = val.get_int64();
-
-	if (auto val = mqsr_root["auto_filtering"]; val.is_bool())
-		mqsr.auto_filtering = val.get_bool();
 }
 
 static std::ostream & operator<<(std::ostream & stream, feature f)
@@ -278,7 +275,6 @@ static std::ostream & write_mqsr(std::ofstream & stream, const configuration::mq
 {
 	stream << "{\"super_sampling\":" << mqsr.super_sampling;
 	stream << ",\"sharpening\":" << mqsr.sharpening;
-	stream << ",\"auto_filtering\":" << std::boolalpha << mqsr.auto_filtering;
 	stream << "}";
 	return stream;
 }

@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WiVRn 0.15\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-13 04:36+0200\n"
+"POT-Creation-Date: 2025-04-13 06:22+0200\n"
 "PO-Revision-Date: 2024-05-20 13:00+0200\n"
 "Last-Translator: Guillaume Meunier <guillaume.meunier@centraliens.net>\n"
 "Language: French\n"
@@ -166,12 +166,12 @@ msgstr "Taux minimal"
 msgid "Resolution scale"
 msgstr "Échelle"
 
-#: client/scenes/lobby_gui.cpp:658 client/scenes/lobby_gui.cpp:901
+#: client/scenes/lobby_gui.cpp:658 client/scenes/lobby_gui.cpp:907
 #, c-format, c++-format
 msgid "%d%% - {}x{} per eye"
 msgstr "%d%% - {}x{} par œil"
 
-#: client/scenes/lobby_gui.cpp:669 client/scenes/lobby_gui.cpp:912
+#: client/scenes/lobby_gui.cpp:669 client/scenes/lobby_gui.cpp:918
 #, c++-format
 msgid "Resolution larger than {}x{} may not be supported by the headset"
 msgstr "Les résolutions plus grandes que {}x{} pourraient ne pas fonctionner"
@@ -239,112 +239,136 @@ msgstr "Temps GPU [ms]"
 msgid "Supersampling"
 msgstr "Suréchantillonnage"
 
-#: client/scenes/lobby_gui.cpp:841
+#: client/scenes/lobby_gui.cpp:840
+msgid ""
+"Reduce flicker for high contrast edges.\n"
+"Useful when the input resolution is high compared to the headset display"
+msgstr ""
+"Réduit le scintillement des contours à haut contraste.\n"
+"Utile quand la résolution d’entrée est haute comparée à l’écran du casque"
+
+#: client/scenes/lobby_gui.cpp:845
 msgid "Sharpening"
 msgstr "Affinage de netteté"
 
-#: client/scenes/lobby_gui.cpp:864
-msgid "Additional automatic texture filtering"
-msgstr "Filtrage additionnel automatique des textures"
+#: client/scenes/lobby_gui.cpp:865
+msgid ""
+"Improve clarity of high contrast edges and counteract blur.\n"
+"Useful when the input resolution is low compared to the headset display"
+msgstr ""
+"Améliore la clarté des contours à haut contraste et réduit le flou.\n"
+"Utile quand la résolution d’entrée est basse comparée à l’écran du casque"
 
-#: client/scenes/lobby_gui.cpp:878
+#: client/scenes/lobby_gui.cpp:874
 msgid "Enable Snapdragon Game Super Resolution"
 msgstr "Activer Snapdragon Game Super Resolution"
 
-#: client/scenes/lobby_gui.cpp:885
-msgid "Client-side upscaling and sharpening, adds a performance cost on the headset"
-msgstr "Mise à l’échelle et affinage de netteté, ajoute un coût en performances pour le casque"
+#: client/scenes/lobby_gui.cpp:883
+msgid ""
+"On this headset, this setting has been fully superseded by the native "
+"Sharpening setting above.\n"
+"Only enable if you know what you’re doing."
+msgstr ""
+"Sur ce casque, ce paramètre a été supplanté par le réglage natif d’affinage de netteté ci-dessus.\n"
+"N’activer que si vous savez ce que vous faites."
 
-#: client/scenes/lobby_gui.cpp:897
+#: client/scenes/lobby_gui.cpp:885
+msgid ""
+"Client-side upscaling and sharpening, adds a performance cost on the headset"
+msgstr ""
+"Mise à l’échelle et affinage de netteté, ajoute un coût en performances pour "
+"le casque"
+
+#: client/scenes/lobby_gui.cpp:903
 msgid "Upscaling factor"
 msgstr "Échelle"
 
-#: client/scenes/lobby_gui.cpp:917
+#: client/scenes/lobby_gui.cpp:923
 msgid "Use edge direction"
 msgstr "Utiliser la direction de contours"
 
-#: client/scenes/lobby_gui.cpp:924
+#: client/scenes/lobby_gui.cpp:930
 msgid "Adds an additional performance cost"
 msgstr "Ajoute un coût additionnel en performances"
 
-#: client/scenes/lobby_gui.cpp:929
+#: client/scenes/lobby_gui.cpp:935
 msgid "Edge threshold"
 msgstr "Seuil de contour"
 
-#: client/scenes/lobby_gui.cpp:936 client/scenes/lobby_gui.cpp:947
+#: client/scenes/lobby_gui.cpp:942 client/scenes/lobby_gui.cpp:953
 #, c++-format
 msgid "Recommended: {:.1f}"
 msgstr "Recommandé : {:.1f}"
 
-#: client/scenes/lobby_gui.cpp:940
+#: client/scenes/lobby_gui.cpp:946
 msgid "Edge sharpness"
 msgstr "Netteté de contour"
 
-#: client/scenes/lobby_gui.cpp:1035 client/scenes/lobby_gui.cpp:1684
+#: client/scenes/lobby_gui.cpp:1041 client/scenes/lobby_gui.cpp:1690
 msgid "Licenses"
 msgstr "Licences"
 
-#: client/scenes/lobby_gui.cpp:1374
+#: client/scenes/lobby_gui.cpp:1380
 msgid "Microphone is enabled"
 msgstr "Le micro est activé"
 
-#: client/scenes/lobby_gui.cpp:1375
+#: client/scenes/lobby_gui.cpp:1381
 msgid "Microphone is disabled"
 msgstr "Le micro est désactivé"
 
-#: client/scenes/lobby_gui.cpp:1384
+#: client/scenes/lobby_gui.cpp:1390
 msgid "Hand tracking is enabled"
 msgstr "Le suivi des mains est activé"
 
-#: client/scenes/lobby_gui.cpp:1385
+#: client/scenes/lobby_gui.cpp:1391
 msgid "Hand tracking is disabled"
 msgstr "Le suivi des mains est désactivé"
 
-#: client/scenes/lobby_gui.cpp:1394
+#: client/scenes/lobby_gui.cpp:1400
 msgid "Eye tracking is enabled"
 msgstr "Le suivi des yeux est activé"
 
-#: client/scenes/lobby_gui.cpp:1395
+#: client/scenes/lobby_gui.cpp:1401
 msgid "Eye tracking is disabled"
 msgstr "Le suivi des yeux est désactivé"
 
-#: client/scenes/lobby_gui.cpp:1405 client/scenes/lobby_gui.cpp:1416
+#: client/scenes/lobby_gui.cpp:1411 client/scenes/lobby_gui.cpp:1422
 msgid "Face tracking is enabled"
 msgstr "Le suivi du visage est activé"
 
-#: client/scenes/lobby_gui.cpp:1406 client/scenes/lobby_gui.cpp:1417
+#: client/scenes/lobby_gui.cpp:1412 client/scenes/lobby_gui.cpp:1423
 msgid "Face tracking is disabled"
 msgstr "Le suivi du visage est désactivé"
 
-#: client/scenes/lobby_gui.cpp:1434
+#: client/scenes/lobby_gui.cpp:1440
 msgid "Add server"
 msgstr "Ajouter un serveur"
 
-#: client/scenes/lobby_gui.cpp:1663
+#: client/scenes/lobby_gui.cpp:1669
 msgid "Server list"
 msgstr "Serveurs"
 
-#: client/scenes/lobby_gui.cpp:1666
+#: client/scenes/lobby_gui.cpp:1672
 msgid "Settings"
 msgstr "Paramètres"
 
-#: client/scenes/lobby_gui.cpp:1671
+#: client/scenes/lobby_gui.cpp:1677
 msgid "Post-processing"
 msgstr "Post-traitement"
 
-#: client/scenes/lobby_gui.cpp:1676
+#: client/scenes/lobby_gui.cpp:1682
 msgid "Debug"
 msgstr "Debug"
 
-#: client/scenes/lobby_gui.cpp:1681
+#: client/scenes/lobby_gui.cpp:1687
 msgid "About"
 msgstr "À propos"
 
-#: client/scenes/lobby_gui.cpp:1687
+#: client/scenes/lobby_gui.cpp:1693
 msgid "Exit"
 msgstr "Quitter"
 
-#: client/scenes/lobby_gui.cpp:1701
+#: client/scenes/lobby_gui.cpp:1707
 msgid ""
 "Press A or X or put your palm up\n"
 "to move the main window"
@@ -352,7 +376,7 @@ msgstr ""
 "Appuyez sur A ou X ou placez votre paume\n"
 "vers le haut pour déplacer la fenêtre principale"
 
-#: client/scenes/lobby_gui.cpp:1703
+#: client/scenes/lobby_gui.cpp:1709
 msgid "Press A or X to move the main window"
 msgstr ""
 "Appuyez sur A ou X pour\n"
